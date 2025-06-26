@@ -1,0 +1,28 @@
+services:
+  gateway:
+    image: bwdesigngroup/ignition-docker:8.1.47
+    hostname: designer-plus-plus
+    platform: linux/amd64
+    environment:
+      GATEWAY_MODULES_ENABLED: perspective
+      ADDITIONAL_DATA_FOLDERS: tags
+      DEVELOPER_MODE: Y
+    volumes:
+      - ../build/Designer-Plus-Plus.modl:/usr/local/bin/ignition/user-lib/modules/Designer-Plus-Plus.modl
+      - ./backups/gateway.gwbk:/restore.gwbk
+      - ./temp/ignition-data:/workdir
+    labels:
+      traefik.enable: "true"
+      traefik.hostname: "designer-plus-plus"
+    command: >
+      -n designer-plus-plus
+      -r /restore.gwbk
+    networks:
+      - default
+      - proxy
+    
+networks:
+  default:
+  proxy:
+    external: true
+    name: proxy

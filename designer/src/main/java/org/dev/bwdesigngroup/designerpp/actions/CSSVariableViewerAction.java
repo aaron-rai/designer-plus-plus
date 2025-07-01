@@ -6,6 +6,8 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
+import java.awt.event.WindowAdapter;
+import java.awt.event.WindowEvent;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -29,8 +31,9 @@ import static com.inductiveautomation.ignition.common.BundleUtil.i18n;
  * @author Aaron Rai
  */
 public class CSSVariableViewerAction extends BaseAction {
-    private static final LoggerEx logger = LoggerEx.newBuilder().build(CSSVariableViewerAction.class);
+    private static final LoggerEx logger = LoggerEx.newBuilder().build(DesignerPlusPlusConstants.MODULE_ID + ".cssVariableViewer");
     private final DesignerContext context;
+    private JFrame cssViewerFrame;
 
     /**
      * Constructor for the CSSVariableViewerAction.
@@ -54,6 +57,15 @@ public class CSSVariableViewerAction extends BaseAction {
     @Override
     public void actionPerformed(java.awt.event.ActionEvent e) {
         logger.debug("CSS Variable Viewer button clicked, initiating view variables request");
+        
+        // Check if frame is already open and visible
+        if (cssViewerFrame != null && cssViewerFrame.isDisplayable()) {
+            logger.debug("CSS Variable Viewer frame already exists, bringing to front");
+            cssViewerFrame.toFront();
+            cssViewerFrame.requestFocus();
+            return;
+        }
+        
 		DesignerPlusPlusRPC rpc = ModuleRPCFactory.create(DesignerPlusPlusConstants.MODULE_ID, DesignerPlusPlusRPC.class);
 		JsonObject cssData = rpc.getCSSData();
         if (cssData != null) {
@@ -69,12 +81,29 @@ public class CSSVariableViewerAction extends BaseAction {
      * 
      * @param cssData The JSON object containing CSS variable data.
      */
-    private static void createAndShowGUI(JsonObject cssData) {
+    private void createAndShowGUI(JsonObject cssData) {
         logger.debug("Creating and showing CSS Variable Viewer GUI");
-        JFrame frame = new JFrame("CSS Variable Viewer");
-        frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-        frame.setSize(400, 600);
-        
+        cssViewerFrame = new JFrame("CSS Variable Viewer");
+        cssViewerFrame.setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
+        cssViewerFrame.setSize(500, 500);
+
+        cssViewerFrame.addWindowListener(new WindowAdapter() {
+            @Override
+            public void windowClosed(WindowEvent e) {
+                cssViewerFrame = null;
+                logger.debug("CSS Variable Viewer frame closed and reference cleared");
+            }
+        });
+
+        Frame parent = context.getFrame();
+        if (parent != null) {
+            logger.infof("Centering CSS Variable Viewer on parent frame: {}", parent.getTitle());
+            cssViewerFrame.setLocationRelativeTo(parent);
+        } else {
+            logger.warn("No parent frame found, centering on screen");
+            Dimension screenSize = Toolkit.getDefaultToolkit().getScreenSize();
+            cssViewerFrame.setLocation((screenSize.width - cssViewerFrame.getWidth()) / 2, (screenSize.height - cssViewerFrame.getHeight()) / 2);
+        }
         JPanel mainPanel = new JPanel();
         mainPanel.setLayout(new BoxLayout(mainPanel, BoxLayout.Y_AXIS));
 
@@ -105,7 +134,7 @@ public class CSSVariableViewerAction extends BaseAction {
             sectionPanel.setBorder(BorderFactory.createEmptyBorder(5, 10, 5, 10));
 
             for (Map.Entry<String, String> entry : resolved.entrySet()) {
-                String varName = entry.getKey();
+                String varName = "var(--" + entry.getKey() + ")";
                 String rawValue = entry.getValue();
 
                 String finalColor = resolveColorValue(rawValue, resolved, 0);
@@ -168,8 +197,8 @@ public class CSSVariableViewerAction extends BaseAction {
         }
 
         JScrollPane scrollPane = new JScrollPane(mainPanel);
-        frame.add(scrollPane);
-        frame.setVisible(true);
+        cssViewerFrame.add(scrollPane);
+        cssViewerFrame.setVisible(true);
     }
 
     /**
@@ -184,8 +213,7 @@ public class CSSVariableViewerAction extends BaseAction {
         if (depth > 10) return value;  // Prevent infinite loops
 
         if (value.startsWith("var(") && value.endsWith(")")) {
-            String key = value.substring(4, value.length() - 1);
-            String referenced = map.getOrDefault(key, "");
+            String referenced = map.getOrDefault(value, "");
             return resolveColorValue(referenced, map, depth + 1);
         }
         return value;

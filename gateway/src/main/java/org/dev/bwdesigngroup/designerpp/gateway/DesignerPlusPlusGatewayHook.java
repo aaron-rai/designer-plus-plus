@@ -17,12 +17,13 @@ import com.inductiveautomation.ignition.gateway.model.GatewayContext;
 import com.inductiveautomation.ignition.gateway.model.GatewayModuleHook;
 import com.inductiveautomation.ignition.gateway.web.models.ConfigCategory;
 import com.inductiveautomation.ignition.gateway.web.models.IConfigTab;
-import com.inductiveautomation.ignition.gateway.web.models.SystemMap;
 import com.inductiveautomation.ignition.gateway.web.pages.config.overviewmeta.ConfigOverviewContributor;
 import com.inductiveautomation.ignition.gateway.web.pages.status.overviewmeta.OverviewContributor;
 
 /**
  * Class which is instantiated by the Ignition platform when the module is loaded in the gateway scope.
+ * 
+ * @author Aaron Rai
  */
 public class DesignerPlusPlusGatewayHook extends AbstractGatewayModuleHook {
     private static final Logger logger = LoggerFactory.getLogger(DesignerPlusPlusGatewayHook.class);
@@ -163,6 +164,13 @@ public class DesignerPlusPlusGatewayHook extends AbstractGatewayModuleHook {
 
     }
 
+    /**
+     * Returns the RPC handler for this module. This is used to handle remote procedure calls from the client.
+     *
+     * @param session      The client request session.
+     * @param projectName  The name of the project associated with the session.
+     * @return An instance of the RPC handler for this module.
+     */
     @Override
     public Object getRPCHandler(ClientReqSession session, String projectName) {
         logger.info("Creating RPC Handler for session: " + session.getId() + ", project: " + projectName);

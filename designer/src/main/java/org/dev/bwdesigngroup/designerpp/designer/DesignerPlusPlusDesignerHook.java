@@ -8,6 +8,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 
 import com.inductiveautomation.ignition.client.icons.VectorIcons;
@@ -86,8 +87,19 @@ public class DesignerPlusPlusDesignerHook extends AbstractDesignerModuleHook {
      * @return true if at least one Sepasoft module is detected, false otherwise
      */
     private boolean isSepasoftInstalled() {
+        List<String> sepasoftIndicators = Arrays.asList(
+            "sepasoft", "mes", "track", "spc", "oee", "downtime", "scheduler", "production", "batch"
+        );
+        
         return getDesignerModules().stream()
-            .anyMatch(module -> module.getName().toLowerCase().contains("sepasoft"));
+            .anyMatch(module -> {
+                String moduleName = module.getName().toLowerCase();
+                
+                return sepasoftIndicators.stream()
+                    .anyMatch(indicator ->
+                        moduleName.contains(indicator)
+                    );
+            });
     }
 
     @Override

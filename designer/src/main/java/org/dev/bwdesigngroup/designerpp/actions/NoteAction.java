@@ -1,6 +1,7 @@
 package org.dev.bwdesigngroup.designerpp.actions;
 
 import org.dev.bwdesigngroup.designerpp.common.DesignerPlusPlusConstants;
+import org.dev.bwdesigngroup.designerpp.designer.DesignerPlusPlusDesignerHook;
 
 import java.awt.BorderLayout;
 import java.awt.Color;
@@ -8,6 +9,7 @@ import java.awt.FlowLayout;
 import java.awt.Frame;
 import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
+import java.io.File;
 
 import javax.swing.*;
 
@@ -30,7 +32,7 @@ public class NoteAction extends BaseAction {
 	private static final LoggerEx logger = LoggerEx.newBuilder().build(DesignerPlusPlusConstants.MODULE_ID + ".toolbarAction");
 	private final DesignerContext context;
 	private JFrame notePadFrame;
-
+	private final File notePadFile = new File(DesignerPlusPlusConstants.NOTEPAD_FILE_LOCATION);
 	/**
 	 * Constructor for the NoteAction.
 	 *
@@ -60,11 +62,15 @@ public class NoteAction extends BaseAction {
 			return;
 		}
 		logger.debug("Creating new NotePad frame");
+		String currentProject = DesignerPlusPlusDesignerHook.getDesignerProject().getName();
+		logger.info("Current project: " + currentProject);
 		createNotePadFrame();
 	}
 
 	/**
 	 * Creates the NotePad frame and sets it up with necessary properties.
+	 * 
+	 * @return void
 	 */
 	private void createNotePadFrame() {
 		logger.debug("Creating NotePad frame");
@@ -87,10 +93,21 @@ public class NoteAction extends BaseAction {
 		} else {
 			logger.warn("Parent frame is null, positioning NotePad frame at default location");
 		}
-		// Add components to the NotePad frame (e.g., text area, buttons)
+		
+		// Add components to the NotePad frame
 		JTextArea textArea = new JTextArea();
-		textArea.setLineWrap(true);
-		textArea.setWrapStyleWord(true);
+		if (notePadFile.exists()) {
+			try {
+				textArea.read(new java.io.FileReader(notePadFile), null);
+				logger.debug("Loaded existing content from NotePad file: " + notePadFile.getAbsolutePath());
+			} catch (Exception ex) {
+				logger.error("Error reading NotePad file: " + notePadFile.getAbsolutePath(), ex);
+			}
+		} else {
+			logger.warn("NotePad file does not exist, this should have been created on startup, please open an issue if this persists.");
+		}
+		
+		textArea.setTabSize(4);
 		notePadFrame.add(new JScrollPane(textArea), BorderLayout.CENTER);
 
 		// Create a panel for the bottom with right-aligned close button
@@ -106,7 +123,20 @@ public class NoteAction extends BaseAction {
 		closeButton.setCursor(new java.awt.Cursor(java.awt.Cursor.HAND_CURSOR));
 		closeButton.setPreferredSize(new Dimension(80, 30));
 		closeButton.addActionListener(e -> notePadFrame.dispose());
-		
+
+		// Add a clear button to the left of the close button to clear the text area
+		JButton clearButton = new JButton("Clear");
+		clearButton.setBackground(Color.GRAY);
+		clearButton.setForeground(Color.WHITE);
+		clearButton.setBorder(BorderFactory.createLineBorder(Color.GRAY, 1));
+		clearButton.setToolTipText("Clears the NotePad text area");
+		clearButton.setCursor(new java.awt.Cursor(java.awt.Cursor.HAND_CURSOR));
+		clearButton.setPreferredSize(new Dimension(80, 30));
+		clearButton.addActionListener(e -> {
+			textArea.setText("");	
+		});
+
+		buttonPanel.add(clearButton);
 		buttonPanel.add(closeButton);
 		bottomPanel.add(buttonPanel, BorderLayout.EAST);
 		notePadFrame.add(bottomPanel, BorderLayout.SOUTH);

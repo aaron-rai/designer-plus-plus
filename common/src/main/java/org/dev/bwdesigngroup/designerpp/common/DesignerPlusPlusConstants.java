@@ -9,4 +9,5 @@ package org.dev.bwdesigngroup.designerpp.common;
 public class DesignerPlusPlusConstants {
     public static final String MODULE_ID = "DesignerPlusPlus";
     public static final String THEMES_DIRECTORY = "/usr/local/bin/ignition/data/modules/com.inductiveautomation.perspective/themes";
+    public static final String NOTEPAD_FILE_LOCATION = "/Applications/Designer Launcher.app/Contents/Resources/notePad.txt";
 }

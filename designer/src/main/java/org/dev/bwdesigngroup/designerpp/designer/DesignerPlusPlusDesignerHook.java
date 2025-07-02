@@ -7,6 +7,7 @@ import org.dev.bwdesigngroup.designerpp.utils.ProjectBrowserStateManager;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.io.File;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -19,6 +20,7 @@ import com.inductiveautomation.ignition.designer.gui.DesignerToolbar;
 import com.inductiveautomation.ignition.designer.model.AbstractDesignerModuleHook;
 import com.inductiveautomation.ignition.designer.model.DesignerContext;
 import com.inductiveautomation.ignition.designer.model.SaveContext;
+import com.inductiveautomation.ignition.designer.project.DesignableProject;
 import com.jidesoft.action.CommandBar;
 
 
@@ -39,10 +41,15 @@ public class DesignerPlusPlusDesignerHook extends AbstractDesignerModuleHook {
      */
     @Override
     public void startup(DesignerContext context, LicenseState activationState) throws Exception {
-        logger.info("Designer++ Designer Hook started");
+        logger.debug("Designer++ Designer Hook started");
         BundleUtil.get().addBundle("designerpp", this.getClass(), "designer");
         DesignerPlusPlusDesignerHook.context = context;
         browserStateManager = new ProjectBrowserStateManager(context);
+        File noteFile = new File("notePad.txt");
+        if (!noteFile.exists()) {
+            noteFile.createNewFile();
+            logger.info("Created notePad.txt file in /Applications/Designer Launcher.app/Contents/Resources");
+        }
     }
 
     /**
@@ -54,7 +61,7 @@ public class DesignerPlusPlusDesignerHook extends AbstractDesignerModuleHook {
     public List<CommandBar> getModuleToolbars() {
         List<CommandBar> toolbars = new ArrayList<>();
 
-        DesignerToolbar toolbar = new DesignerToolbar("DesignerPlusPlus", "Toolbar.Name");
+        DesignerToolbar toolbar = new DesignerToolbar("Designer++", "designerpp.Toolbar.Name");
 
         CSSVariableViewerAction cssAction = new CSSVariableViewerAction(
             context,
@@ -79,6 +86,16 @@ public class DesignerPlusPlusDesignerHook extends AbstractDesignerModuleHook {
      */
     public List <ModuleInfo> getDesignerModules() {
         return context.getModules();
+    }
+
+
+    /**
+     * Gets the current project in the designer.
+     * 
+     * @return The DesignableProject instance representing the current project.
+     */
+    public static DesignableProject getDesignerProject() {
+        return context.getProject();
     }
     
     /**
@@ -107,12 +124,12 @@ public class DesignerPlusPlusDesignerHook extends AbstractDesignerModuleHook {
         logger.debug("Project save started, checking if Sepasoft modules are present");
         
         if (isSepasoftInstalled()) {
-            logger.info("Sepasoft module detected, capturing project browser state");
+            logger.trace("Sepasoft module detected, capturing project browser state");
             if (browserStateManager != null) {
                 browserStateManager.captureState();
             }
         } else {
-            logger.info("No Sepasoft modules detected, skipping browser state capture");
+            logger.trace("No Sepasoft modules detected, skipping browser state capture");
         }
     }
 
@@ -121,7 +138,7 @@ public class DesignerPlusPlusDesignerHook extends AbstractDesignerModuleHook {
         logger.debug("Project save completed, checking if we need to restore browser state");
         
         if (isSepasoftInstalled() && browserStateManager != null) {
-            logger.info("Restoring project browser state");
+            logger.trace("Restoring project browser state");
             browserStateManager.restoreState();
         }
     }
@@ -133,7 +150,7 @@ public class DesignerPlusPlusDesignerHook extends AbstractDesignerModuleHook {
      */
     @Override
     public void shutdown() {
-        logger.info("Designer++ Designer Hook shutting down");
+        logger.debug("Designer++ Designer Hook shutting down");
         if (browserStateManager != null) {
             browserStateManager = null;
         }

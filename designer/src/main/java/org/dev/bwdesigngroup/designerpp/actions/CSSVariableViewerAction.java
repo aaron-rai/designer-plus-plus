@@ -15,11 +15,12 @@ import javax.swing.*;
 
 import org.dev.bwdesigngroup.designerpp.common.DesignerPlusPlusConstants;
 import org.dev.bwdesigngroup.designerpp.common.DesignerPlusPlusRPC;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import com.inductiveautomation.ignition.client.gateway_interface.ModuleRPCFactory;
 import com.inductiveautomation.ignition.client.util.action.BaseAction;
 import com.inductiveautomation.ignition.common.gson.JsonObject;
-import com.inductiveautomation.ignition.common.util.LoggerEx;
 import com.inductiveautomation.ignition.designer.model.DesignerContext;
 
 import static com.inductiveautomation.ignition.common.BundleUtil.i18n;
@@ -31,7 +32,7 @@ import static com.inductiveautomation.ignition.common.BundleUtil.i18n;
  * @author Aaron Rai
  */
 public class CSSVariableViewerAction extends BaseAction {
-    private static final LoggerEx logger = LoggerEx.newBuilder().build(DesignerPlusPlusConstants.MODULE_ID + ".cssVariableViewer");
+    private static final Logger logger = LoggerFactory.getLogger(DesignerPlusPlusConstants.MODULE_ID + ".cssVariableViewer");
     private final DesignerContext context;
     private JFrame cssViewerFrame;
 
@@ -56,9 +57,6 @@ public class CSSVariableViewerAction extends BaseAction {
      */
     @Override
     public void actionPerformed(java.awt.event.ActionEvent e) {
-        logger.debug("CSS Variable Viewer button clicked, initiating view variables request");
-        
-        // Check if frame is already open and visible
         if (cssViewerFrame != null && cssViewerFrame.isDisplayable()) {
             logger.debug("CSS Variable Viewer frame already exists, bringing to front");
             cssViewerFrame.toFront();
@@ -85,7 +83,7 @@ public class CSSVariableViewerAction extends BaseAction {
         logger.debug("Creating and showing CSS Variable Viewer GUI");
         cssViewerFrame = new JFrame("CSS Variable Viewer");
         cssViewerFrame.setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
-        cssViewerFrame.setSize(500, 500);
+        cssViewerFrame.setSize(450, 500);
 
         cssViewerFrame.addWindowListener(new WindowAdapter() {
             @Override
@@ -97,7 +95,6 @@ public class CSSVariableViewerAction extends BaseAction {
 
         Frame parent = context.getFrame();
         if (parent != null) {
-            logger.infof("Centering CSS Variable Viewer on parent frame: {}", parent.getTitle());
             cssViewerFrame.setLocationRelativeTo(parent);
         } else {
             logger.warn("No parent frame found, centering on screen");
@@ -119,7 +116,7 @@ public class CSSVariableViewerAction extends BaseAction {
                 variables = theme.getAsJsonObject("styles.css");
             }
             else {
-                continue;  // Skip themes without variable definitions
+                continue;
             }
 
             // Convert JSONObject to Map<String, String> for easy access
@@ -145,10 +142,13 @@ public class CSSVariableViewerAction extends BaseAction {
                 row.setAlignmentX(Component.LEFT_ALIGNMENT);
 
                 JLabel colorBox = new JLabel();
-                try {
-                    colorBox.setBackground(Color.decode(finalColor));
-                } catch (Exception e) {
-                    logger.errorEvent(themeName, e);
+                Color color = parseColor(finalColor);
+                if (color != null) {
+                    colorBox.setBackground(color);
+                } else {
+                    logger.warn("Could not parse color value for " + varName + ": " + finalColor);
+                    // Use a default gray color for unparseable colors
+                    colorBox.setBackground(Color.LIGHT_GRAY);
                 }
                 colorBox.setOpaque(true);
                 colorBox.setPreferredSize(new Dimension(20, 20));
@@ -160,13 +160,15 @@ public class CSSVariableViewerAction extends BaseAction {
                     public void mouseClicked(MouseEvent e) {
                         Toolkit.getDefaultToolkit().getSystemClipboard()
                             .setContents(new StringSelection(varName), null);
-                        System.out.println("Copied to clipboard: " + varName);
+                        System.out.println("Copied: " + varName);
                     }
                 });
 
                 row.add(colorBox);
                 row.add(Box.createHorizontalStrut(10));
                 row.add(label);
+                row.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
+                row.setToolTipText("Click to copy variable name: " + varName);
                 sectionPanel.add(row);
             }
 
@@ -231,5 +233,77 @@ public class CSSVariableViewerAction extends BaseAction {
 
         return value.matches("^#([0-9a-f]{3}|[0-9a-f]{6})$")
                 || value.matches("rgba?\\(([^)]+)\\)");
+    }
+
+    /**
+     * Parses a CSS color string and returns a Java Color object.
+     * Supports hex colors (#RGB, #RRGGBB) and rgba/rgb colors.
+     * 
+     * @param colorString The CSS color string to parse
+     * @return A Color object, or null if parsing fails
+     */
+    private static Color parseColor(String colorString) {
+        if (colorString == null) return null;
+        
+        colorString = colorString.trim().toLowerCase();
+        
+        // Handle hex colors
+        if (colorString.matches("^#([0-9a-f]{3}|[0-9a-f]{6})$")) {
+            try {
+                return Color.decode(colorString);
+            } catch (NumberFormatException e) {
+                return null;
+            }
+        }
+        
+        // Handle rgba colors
+        if (colorString.startsWith("rgba(") && colorString.endsWith(")")) {
+            String values = colorString.substring(5, colorString.length() - 1);
+            String[] parts = values.split(",");
+            
+            if (parts.length == 4) {
+                try {
+                    int r = Integer.parseInt(parts[0].trim());
+                    int g = Integer.parseInt(parts[1].trim());
+                    int b = Integer.parseInt(parts[2].trim());
+                    float a = Float.parseFloat(parts[3].trim());
+                    
+                    // Clamp values to valid ranges
+                    r = Math.max(0, Math.min(255, r));
+                    g = Math.max(0, Math.min(255, g));
+                    b = Math.max(0, Math.min(255, b));
+                    a = Math.max(0.0f, Math.min(1.0f, a));
+                    
+                    return new Color(r, g, b, (int)(a * 255));
+                } catch (NumberFormatException e) {
+                    return null;
+                }
+            }
+        }
+        
+        // Handle rgb colors
+        if (colorString.startsWith("rgb(") && colorString.endsWith(")")) {
+            String values = colorString.substring(4, colorString.length() - 1);
+            String[] parts = values.split(",");
+            
+            if (parts.length == 3) {
+                try {
+                    int r = Integer.parseInt(parts[0].trim());
+                    int g = Integer.parseInt(parts[1].trim());
+                    int b = Integer.parseInt(parts[2].trim());
+                    
+                    // Clamp values to valid ranges
+                    r = Math.max(0, Math.min(255, r));
+                    g = Math.max(0, Math.min(255, g));
+                    b = Math.max(0, Math.min(255, b));
+                    
+                    return new Color(r, g, b);
+                } catch (NumberFormatException e) {
+                    return null;
+                }
+            }
+        }
+        
+        return null;
     }
 }

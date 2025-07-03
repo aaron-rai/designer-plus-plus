@@ -1,25 +1,23 @@
 package org.dev.bwdesigngroup.designerpp.actions;
 
 import java.awt.*;
+import java.awt.event.*;
 import java.awt.datatransfer.StringSelection;
-import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
-import java.awt.event.MouseAdapter;
-import java.awt.event.MouseEvent;
-import java.awt.event.WindowAdapter;
-import java.awt.event.WindowEvent;
-import java.util.HashMap;
+import java.util.LinkedHashMap;
+import java.util.List;
 import java.util.Map;
 
 import javax.swing.*;
 
 import org.dev.bwdesigngroup.designerpp.common.DesignerPlusPlusConstants;
 import org.dev.bwdesigngroup.designerpp.common.DesignerPlusPlusRPC;
+import org.dev.bwdesigngroup.designerpp.utils.ParseColor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.inductiveautomation.ignition.client.gateway_interface.ModuleRPCFactory;
 import com.inductiveautomation.ignition.client.util.action.BaseAction;
+import com.inductiveautomation.ignition.common.gson.JsonElement;
 import com.inductiveautomation.ignition.common.gson.JsonObject;
 import com.inductiveautomation.ignition.designer.model.DesignerContext;
 
@@ -35,6 +33,7 @@ public class CSSVariableViewerAction extends BaseAction {
     private static final Logger logger = LoggerFactory.getLogger(DesignerPlusPlusConstants.MODULE_ID + ".cssVariableViewer");
     private final DesignerContext context;
     private JFrame cssViewerFrame;
+    private final List<String> defaultThemes = DesignerPlusPlusConstants.IGNITION_DEFAULT_THEMES;
 
     /**
      * Constructor for the CSSVariableViewerAction.
@@ -74,13 +73,14 @@ public class CSSVariableViewerAction extends BaseAction {
         }
 	}
 
-    /**
-     * Creates and displays the CSS Variable Viewer GUI.
-     * 
-     * @param cssData The JSON object containing CSS variable data.
-     */
-    private void createAndShowGUI(JsonObject cssData) {
+        /**
+         * Creates and displays the CSS Variable Viewer GUI with variables in order.
+         * 
+         * @param cssData The JSON object containing CSS variable data.
+         */
+        private void createAndShowGUI(JsonObject cssData) {
         logger.debug("Creating and showing CSS Variable Viewer GUI");
+
         cssViewerFrame = new JFrame("CSS Variable Viewer");
         cssViewerFrame.setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
         cssViewerFrame.setSize(450, 500);
@@ -105,8 +105,10 @@ public class CSSVariableViewerAction extends BaseAction {
         mainPanel.setLayout(new BoxLayout(mainPanel, BoxLayout.Y_AXIS));
 
         JsonObject themes = cssData.getAsJsonObject("themes");
-        for (String themeName : themes.keySet()) {
-            JsonObject theme = themes.getAsJsonObject(themeName);
+
+        for (Map.Entry<String, JsonElement> themeEntry : themes.entrySet()) {
+            String themeName = themeEntry.getKey();
+            JsonObject theme = themeEntry.getValue().getAsJsonObject();
             JsonObject variables;
 
             if (theme.has("variables.css")) {
@@ -119,10 +121,9 @@ public class CSSVariableViewerAction extends BaseAction {
                 continue;
             }
 
-            // Convert JSONObject to Map<String, String> for easy access
-            Map<String, String> resolved = new HashMap<>();
-            for (String key : variables.keySet()) {
-                resolved.put(key, variables.get(key).getAsString());
+            Map<String, String> resolved = new LinkedHashMap<>();
+            for (Map.Entry<String, JsonElement> varEntry : variables.entrySet()) {
+                resolved.put(varEntry.getKey(), varEntry.getValue().getAsString());
             }
 
             // Container for collapsible content
@@ -134,26 +135,34 @@ public class CSSVariableViewerAction extends BaseAction {
                 String varName = "var(--" + entry.getKey() + ")";
                 String rawValue = entry.getValue();
 
-                String finalColor = resolveColorValue(rawValue, resolved, 0);
-
-                if (!isColor(finalColor)) continue;  // Skip non-colors
+                // Resolve the value only for color detection and parsing
+                String finalValue = resolveColorValue(rawValue, resolved, 0);
 
                 JPanel row = new JPanel(new FlowLayout(FlowLayout.LEFT));
                 row.setAlignmentX(Component.LEFT_ALIGNMENT);
 
-                JLabel colorBox = new JLabel();
-                Color color = parseColor(finalColor);
-                if (color != null) {
-                    colorBox.setBackground(color);
-                } else {
-                    logger.warn("Could not parse color value for " + varName + ": " + finalColor);
-                    // Use a default gray color for unparseable colors
-                    colorBox.setBackground(Color.LIGHT_GRAY);
+                // Check if this is a color value that we can parse
+                boolean isColorValue = ParseColor.isColor(finalValue);
+                Color parsedColor = null;
+                
+                if (isColorValue) {
+                    parsedColor = ParseColor.parseColor(finalValue);
                 }
-                colorBox.setOpaque(true);
-                colorBox.setPreferredSize(new Dimension(20, 20));
 
-                JLabel label = new JLabel(varName + ": " + finalColor);
+                if (parsedColor != null) {
+                    JLabel colorBox = new JLabel();
+                    colorBox.setBackground(parsedColor);
+                    colorBox.setOpaque(true);
+                    colorBox.setPreferredSize(new Dimension(20, 20));
+                    row.add(colorBox);
+                    row.add(Box.createHorizontalStrut(10));
+                } else {
+                    JLabel placeholderIcon = new JLabel("🔗");
+                    row.add(placeholderIcon);
+                }
+
+                JLabel label = new JLabel("<html>" + varName + ": <b>" + rawValue + "</b></html>");
+                row.add(label);
 
                 row.addMouseListener(new MouseAdapter() {
                     @Override
@@ -164,9 +173,6 @@ public class CSSVariableViewerAction extends BaseAction {
                     }
                 });
 
-                row.add(colorBox);
-                row.add(Box.createHorizontalStrut(10));
-                row.add(label);
                 row.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
                 row.setToolTipText("Click to copy variable name: " + varName);
                 sectionPanel.add(row);
@@ -212,98 +218,12 @@ public class CSSVariableViewerAction extends BaseAction {
      * @return The resolved color value.
      */
     private static String resolveColorValue(String value, Map<String, String> map, int depth) {
-        if (depth > 10) return value;  // Prevent infinite loops
+        if (depth > 10) return value;
 
         if (value.startsWith("var(") && value.endsWith(")")) {
             String referenced = map.getOrDefault(value, "");
             return resolveColorValue(referenced, map, depth + 1);
         }
         return value;
-    }
-
-    /**
-     * Checks if a string is a valid CSS color value.
-     * 
-     * @param value The string to check.
-     * @return True if the string is a valid color, false otherwise.
-     */
-    private static boolean isColor(String value) {
-        if (value == null) return false;
-        value = value.trim().toLowerCase();
-
-        return value.matches("^#([0-9a-f]{3}|[0-9a-f]{6})$")
-                || value.matches("rgba?\\(([^)]+)\\)");
-    }
-
-    /**
-     * Parses a CSS color string and returns a Java Color object.
-     * Supports hex colors (#RGB, #RRGGBB) and rgba/rgb colors.
-     * 
-     * @param colorString The CSS color string to parse
-     * @return A Color object, or null if parsing fails
-     */
-    private static Color parseColor(String colorString) {
-        if (colorString == null) return null;
-        
-        colorString = colorString.trim().toLowerCase();
-        
-        // Handle hex colors
-        if (colorString.matches("^#([0-9a-f]{3}|[0-9a-f]{6})$")) {
-            try {
-                return Color.decode(colorString);
-            } catch (NumberFormatException e) {
-                return null;
-            }
-        }
-        
-        // Handle rgba colors
-        if (colorString.startsWith("rgba(") && colorString.endsWith(")")) {
-            String values = colorString.substring(5, colorString.length() - 1);
-            String[] parts = values.split(",");
-            
-            if (parts.length == 4) {
-                try {
-                    int r = Integer.parseInt(parts[0].trim());
-                    int g = Integer.parseInt(parts[1].trim());
-                    int b = Integer.parseInt(parts[2].trim());
-                    float a = Float.parseFloat(parts[3].trim());
-                    
-                    // Clamp values to valid ranges
-                    r = Math.max(0, Math.min(255, r));
-                    g = Math.max(0, Math.min(255, g));
-                    b = Math.max(0, Math.min(255, b));
-                    a = Math.max(0.0f, Math.min(1.0f, a));
-                    
-                    return new Color(r, g, b, (int)(a * 255));
-                } catch (NumberFormatException e) {
-                    return null;
-                }
-            }
-        }
-        
-        // Handle rgb colors
-        if (colorString.startsWith("rgb(") && colorString.endsWith(")")) {
-            String values = colorString.substring(4, colorString.length() - 1);
-            String[] parts = values.split(",");
-            
-            if (parts.length == 3) {
-                try {
-                    int r = Integer.parseInt(parts[0].trim());
-                    int g = Integer.parseInt(parts[1].trim());
-                    int b = Integer.parseInt(parts[2].trim());
-                    
-                    // Clamp values to valid ranges
-                    r = Math.max(0, Math.min(255, r));
-                    g = Math.max(0, Math.min(255, g));
-                    b = Math.max(0, Math.min(255, b));
-                    
-                    return new Color(r, g, b);
-                } catch (NumberFormatException e) {
-                    return null;
-                }
-            }
-        }
-        
-        return null;
     }
 }

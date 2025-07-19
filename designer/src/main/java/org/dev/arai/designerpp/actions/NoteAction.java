@@ -2,6 +2,8 @@ package org.dev.arai.designerpp.actions;
 
 import org.dev.arai.designerpp.common.DesignerPlusPlusConstants;
 import org.dev.arai.designerpp.designer.DesignerPlusPlusDesignerHook;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.awt.BorderLayout;
 import java.awt.Color;
@@ -10,11 +12,15 @@ import java.awt.Frame;
 import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
 import java.io.File;
+import java.io.FileWriter;
+import java.io.IOException;
 
 import javax.swing.*;
 
 import java.awt.Dimension;
 import com.inductiveautomation.ignition.client.util.action.BaseAction;
+import com.inductiveautomation.ignition.common.gson.JsonObject;
+import com.inductiveautomation.ignition.common.gson.JsonParser;
 import com.inductiveautomation.ignition.common.util.LoggerEx;
 import com.inductiveautomation.ignition.designer.model.DesignerContext;
 
@@ -29,10 +35,11 @@ import static com.inductiveautomation.ignition.common.BundleUtil.i18n;
  */
 public class NoteAction extends BaseAction {
 
-	private static final LoggerEx logger = LoggerEx.newBuilder().build(DesignerPlusPlusConstants.MODULE_ID + ".ToolbarAction");
+	private static final Logger logger = LoggerFactory.getLogger(DesignerPlusPlusConstants.MODULE_ID + ".ToolbarAction");
 	private final DesignerContext context;
 	private JFrame notePadFrame;
 	private final File notePadFile = new File(DesignerPlusPlusConstants.NOTEPAD_FILE_LOCATION);
+	private String currentProjectName = DesignerPlusPlusDesignerHook.getDesignerProject().getName();
 	/**
 	 * Constructor for the NoteAction.
 	 *
@@ -54,15 +61,12 @@ public class NoteAction extends BaseAction {
 	@Override
 	public void actionPerformed(java.awt.event.ActionEvent e) {
 		logger.debug("Toolbar Action button clicked, opening NotePad dropdown");
-
 		if (notePadFrame != null && notePadFrame.isDisplayable()) {
 			notePadFrame.toFront();
 			notePadFrame.requestFocus();
 			return;
 		}
 		logger.debug("Creating new NotePad frame");
-		String currentProject = DesignerPlusPlusDesignerHook.getDesignerProject().getName();
-		logger.debug("Current project: " + currentProject);
 		createNotePadFrame();
 	}
 
@@ -96,16 +100,15 @@ public class NoteAction extends BaseAction {
 		// Add components to the NotePad frame
 		JTextArea textArea = new JTextArea();
 		if (notePadFile.exists()) {
-			try {
-				textArea.read(new java.io.FileReader(notePadFile), null);
-				logger.debug("Loaded existing content from NotePad file: " + notePadFile.getAbsolutePath());
+			try { 
+				String content = loadNotePadContent(currentProjectName);
+				textArea.setText(content);
 			} catch (Exception ex) {
-				logger.error("Error reading NotePad file: " + notePadFile.getAbsolutePath(), ex);
+				logger.error("Error loading NotePad content from file: " + notePadFile.getAbsolutePath(), ex);
+				textArea.setText("");
 			}
-		} else {
-			logger.warn("NotePad file does not exist, this should have been created on startup, please open an issue if this persists.");
 		}
-		
+
 		textArea.setTabSize(4);
 		notePadFrame.add(new JScrollPane(textArea), BorderLayout.CENTER);
 
@@ -121,6 +124,13 @@ public class NoteAction extends BaseAction {
 		closeButton.setToolTipText("Closes the NotePad");
 		closeButton.setCursor(new java.awt.Cursor(java.awt.Cursor.HAND_CURSOR));
 		closeButton.setPreferredSize(new Dimension(80, 30));
+		closeButton.addActionListener(e -> {
+			try {
+				saveNotePadContent(currentProjectName, notePadFrame);
+			} catch (Exception ex) {
+				logger.error("Error saving NotePad content on close: ", ex);
+			}
+		});
 		closeButton.addActionListener(e -> notePadFrame.dispose());
 
 		// Add a clear button to the left of the close button to clear the text area
@@ -140,5 +150,114 @@ public class NoteAction extends BaseAction {
 		bottomPanel.add(buttonPanel, BorderLayout.EAST);
 		notePadFrame.add(bottomPanel, BorderLayout.SOUTH);
 		notePadFrame.setVisible(true);
+
+		// Save the content to the NotePad file when the frame is closed
+		notePadFrame.addWindowListener(new WindowAdapter() {
+			@Override
+			public void windowClosing(WindowEvent e) {
+				try {
+					saveNotePadContent(currentProjectName, notePadFrame);
+				} catch (Exception ex) {
+					logger.error("Error saving NotePad content on close: ", ex);
+				}
+			}
+		});
+	}
+
+	/**
+	 * Loads the content of the NotePad from a file, if no JsonObject exists, it creates a new one and returns it.
+	 * @param projectName The name of the project, used to identify the NotePad content.
+	 * @return String containing the NotePad content filtered to the current project.
+	 */
+	public String loadNotePadContent(String projectName) {
+		logger.debug("Loading NotePad content from file: " + notePadFile.getAbsolutePath());
+
+		if (notePadFile.exists()) {
+			try {
+				JsonParser parser = new JsonParser();
+				String fileContent = new String(java.nio.file.Files.readAllBytes(notePadFile.toPath()));
+				if (fileContent.trim().isEmpty()) {
+					return "";
+				}
+
+				JsonObject notePadContent = parser.parse(fileContent).getAsJsonObject();
+				JsonObject projects = notePadContent.getAsJsonObject("projects");
+
+				if (projects.has(projectName)) {
+					JsonObject projectContent = projects.getAsJsonObject(projectName);
+					logger.debug("NotePad content loaded for project: " + projectName);
+					return projectContent.get("content").getAsString();
+				} else {
+					return "";
+				}
+
+			} catch (IOException e) {
+				logger.error("Error reading NotePad file: " + notePadFile.getAbsolutePath(), e);
+				return "";
+			}
+		} else {
+			logger.warn("NotePad file does not exist at {}! This is unexpected! Creating new file. ", notePadFile.getAbsolutePath());
+			try {
+				notePadFile.createNewFile();
+			} catch (IOException e) {
+				logger.error("Error creating NotePad file: " + notePadFile.getAbsolutePath(), e);
+				return "";
+			}
+		}
+		return "";
+	}
+
+	/**
+	 * Saves the content of the NotePad to a file in a JSONObject format that contains the project name and the content.
+	 * @param projectName The name of the project.
+	 * @param notePadFrame The NotePad frame containing the text area with content to save.
+	 * @return void
+	 */
+	public void saveNotePadContent(String projectName, JFrame notePadFrame) {
+		logger.debug("Saving NotePad content for project: " + projectName);
+		String content;
+		if (notePadFrame != null) {
+			content = ((JTextArea) ((JScrollPane) notePadFrame.getContentPane().getComponent(0)).getViewport().getView()).getText();
+		} else {
+			return; // No NotePad frame, nothing to save
+		}
+		
+		// Load existing content from file or create new if file doesn't exist
+		JsonObject notePadContent = new JsonObject();
+		if (notePadFile.exists()) {
+			try {
+				String fileContent = new String(java.nio.file.Files.readAllBytes(notePadFile.toPath()));
+				if (!fileContent.trim().isEmpty()) {
+					JsonParser parser = new JsonParser();
+					notePadContent = parser.parse(fileContent).getAsJsonObject();
+				}
+			} catch (IOException e) {
+				logger.error("Error reading existing NotePad file: " + notePadFile.getAbsolutePath(), e);
+				// Continue with empty JsonObject if reading fails
+			}
+		}
+		
+		// Get or create the projects object
+		JsonObject projects;
+		if (notePadContent.has("projects")) {
+			projects = notePadContent.getAsJsonObject("projects");
+		} else {
+			projects = new JsonObject();
+			notePadContent.add("projects", projects);
+		}
+		
+		// Add or update the current project's content
+		if (!projects.has(projectName)) {
+			projects.add(projectName, new JsonObject());
+		}
+		projects.getAsJsonObject(projectName).addProperty("content", content);
+
+		// Write the JsonObject to the NotePad file
+		try (FileWriter fileWriter = new FileWriter(notePadFile)) {
+			fileWriter.write(notePadContent.toString());
+			logger.debug("NotePad content saved successfully to file: " + notePadFile.getAbsolutePath());
+		} catch (IOException e) {
+			logger.error("Error writing NotePad content to file: " + notePadFile.getAbsolutePath(), e);
+		}
 	}
 }

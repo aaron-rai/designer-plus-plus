@@ -45,10 +45,10 @@ public class DesignerPlusPlusDesignerHook extends AbstractDesignerModuleHook {
         BundleUtil.get().addBundle("designerpp", this.getClass(), "designer");
         DesignerPlusPlusDesignerHook.context = context;
         browserStateManager = new ProjectBrowserStateManager(context);
-        File noteFile = new File("notePad.txt");
+        File noteFile = new File("notePad.json");
         if (!noteFile.exists()) {
             noteFile.createNewFile();
-            logger.info("Created notePad.txt file in /Applications/Designer Launcher.app/Contents/Resources");
+            logger.info("Created notePad.json file in /Applications/Designer Launcher.app/Contents/Resources");
         }
     }
 

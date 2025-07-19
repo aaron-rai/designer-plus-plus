@@ -1,7 +1,7 @@
-package org.dev.bwdesigngroup.designerpp.actions;
+package org.dev.arai.designerpp.actions;
 
-import org.dev.bwdesigngroup.designerpp.common.DesignerPlusPlusConstants;
-import org.dev.bwdesigngroup.designerpp.designer.DesignerPlusPlusDesignerHook;
+import org.dev.arai.designerpp.common.DesignerPlusPlusConstants;
+import org.dev.arai.designerpp.designer.DesignerPlusPlusDesignerHook;
 
 import java.awt.BorderLayout;
 import java.awt.Color;
@@ -29,7 +29,7 @@ import static com.inductiveautomation.ignition.common.BundleUtil.i18n;
  */
 public class NoteAction extends BaseAction {
 
-	private static final LoggerEx logger = LoggerEx.newBuilder().build(DesignerPlusPlusConstants.MODULE_ID + ".toolbarAction");
+	private static final LoggerEx logger = LoggerEx.newBuilder().build(DesignerPlusPlusConstants.MODULE_ID + ".ToolbarAction");
 	private final DesignerContext context;
 	private JFrame notePadFrame;
 	private final File notePadFile = new File(DesignerPlusPlusConstants.NOTEPAD_FILE_LOCATION);
@@ -56,14 +56,13 @@ public class NoteAction extends BaseAction {
 		logger.debug("Toolbar Action button clicked, opening NotePad dropdown");
 
 		if (notePadFrame != null && notePadFrame.isDisplayable()) {
-			logger.info("NotePad already open, bringing it to the front");
 			notePadFrame.toFront();
 			notePadFrame.requestFocus();
 			return;
 		}
 		logger.debug("Creating new NotePad frame");
 		String currentProject = DesignerPlusPlusDesignerHook.getDesignerProject().getName();
-		logger.info("Current project: " + currentProject);
+		logger.debug("Current project: " + currentProject);
 		createNotePadFrame();
 	}
 

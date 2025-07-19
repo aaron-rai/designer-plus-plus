@@ -24,9 +24,9 @@ ignitionModule {
     moduleDependencies.set(mapOf<String, String>())
     moduleDependencySpecs { }
     hooks.putAll(mapOf(
-        "org.dev.bwdesigngroup.designerpp.gateway.DesignerPlusPlusGatewayHook" to "G",
-        "org.dev.bwdesigngroup.designerpp.client.DesignerPlusPlusClientHook" to "C",
-        "org.dev.bwdesigngroup.designerpp.designer.DesignerPlusPlusDesignerHook" to "D"
+        "org.dev.arai.designerpp.gateway.DesignerPlusPlusGatewayHook" to "G",
+        "org.dev.arai.designerpp.client.DesignerPlusPlusClientHook" to "C",
+        "org.dev.arai.designerpp.designer.DesignerPlusPlusDesignerHook" to "D"
     ))
     skipModlSigning.set(!findProperty("signModule").toString().toBoolean())
 }

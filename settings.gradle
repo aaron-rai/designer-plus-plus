@@ -7,7 +7,7 @@ pluginManagement {
     }
 }
 
-rootProject.name = "css-variable-viewer"
+rootProject.name = "Designer++"
 
 dependencyResolutionManagement {
     repositories {

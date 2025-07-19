@@ -10,13 +10,12 @@ Enhanced designer tools and utilities for Ignition development that improve the 
 - **Visual Color Preview**: See color swatches next to color variables for quick visual reference
 - **One-Click Copy**: Click any variable to copy its name (`var(--variable-name)`) to clipboard
 - **Theme Organization**: Variables are grouped by theme (dark, light, custom themes, etc.)
-- **Smart Resolution**: Automatically resolves nested variable references to show final computed values
 
 ### 📝 NotePad
 
 - **Quick Notes**: Simple text editor accessible from the designer toolbar for jotting down quick notes, TODOs, or code snippets
 - **Project-Scoped**: Notes are saved per project (planned feature)
-- **Persistent Storage**: Notes are automatically saved and restored between designer sessions
+- **Persistent Storage (Planned)**: Notes are automatically saved and restored between designer sessions
 - **Clean Interface**: Minimal, distraction-free editor with clear and close buttons
 
 ### 🌳 Project Browser State Manager
@@ -118,23 +117,14 @@ designer-plus-plus/
 ### ✅ Completed
 
 - CSS Variable Viewer with visual interface
-- NotePad with persistent storage
-- Project browser state management for Sepasoft compatibility
-- Comprehensive logging and error handling
-- Modular, extensible architecture
+- Designer NotePad
+- Project browser state management for Designers with Sepasoft modules
 
 ### 🚧 In Progress
 
 - Per-project notepad storage
 - Enhanced CSS variable filtering and search
 - Additional theme format support
-
-### 📋 Planned
-
-- Variable usage finder (find where CSS variables are used)
-- Theme comparison tool
-- Export functionality for CSS variables
-- Integration with more module types
 
 ## Contributing
 
@@ -165,7 +155,7 @@ designer-plus-plus/
 
 ## License
 
-This project is licensed under the MIT License - see the LICENSE file for details.
+This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
 
 ## Support
 

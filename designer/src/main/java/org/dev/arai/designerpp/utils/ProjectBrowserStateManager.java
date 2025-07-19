@@ -1,6 +1,6 @@
-package org.dev.bwdesigngroup.designerpp.utils;
+package org.dev.arai.designerpp.utils;
 
-import org.dev.bwdesigngroup.designerpp.common.DesignerPlusPlusConstants;
+import org.dev.arai.designerpp.common.DesignerPlusPlusConstants;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -18,7 +18,7 @@ import java.util.*;
  * @author Keith Gamble
  */
 public class ProjectBrowserStateManager {
-    private final Logger logger = LoggerFactory.getLogger(DesignerPlusPlusConstants.MODULE_ID + ".browserState");
+    private final Logger logger = LoggerFactory.getLogger(DesignerPlusPlusConstants.MODULE_ID + ".BrowserState");
     private final DesignerContext context;
     private Map<String, TreeNodeState> lastTreeState;
 

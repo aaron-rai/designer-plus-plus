@@ -1,14 +1,14 @@
-package org.dev.bwdesigngroup.designerpp.utils;
+package org.dev.arai.designerpp.utils;
 
 import java.awt.Color;
 
-import org.dev.bwdesigngroup.designerpp.common.DesignerPlusPlusConstants;
+import org.dev.arai.designerpp.common.DesignerPlusPlusConstants;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 public class ParseColor {
 
-	private final static Logger logger = LoggerFactory.getLogger(DesignerPlusPlusConstants.MODULE_ID + ".parseColor");
+	private final static Logger logger = LoggerFactory.getLogger(DesignerPlusPlusConstants.MODULE_ID + ".ParseColor");
 
 	/**
      * Checks if a string is a valid CSS color value.
@@ -24,7 +24,7 @@ public class ParseColor {
                 || value.matches("rgba?\\([^)]+\\)")
                 || value.startsWith("hsl")
                 || value.startsWith("oklch");
-		logger.debug("isColor('{}') = {}", value, isColor);
+		logger.trace("isColor('{}') = {}", value, isColor);
 		return isColor;
     }
 
@@ -52,21 +52,21 @@ public class ParseColor {
         
         // Handle rgba colors (both comma and space separated)
         if (colorString.startsWith("rgba(") && colorString.endsWith(")")) {
-			logger.debug("Parsing RGBA color: {}", colorString);
+			logger.trace("Parsing RGBA color: {}", colorString);
             String values = colorString.substring(5, colorString.length() - 1);
             return parseRgbaValues(values);
         }
         
         // Handle rgb colors (both comma and space separated)
         if (colorString.startsWith("rgb(") && colorString.endsWith(")")) {
-			logger.debug("Parsing RGB color: {}", colorString);
+			logger.trace("Parsing RGB color: {}", colorString);
             String values = colorString.substring(4, colorString.length() - 1);
             return parseRgbValues(values);
         }
         
         // Handle basic hsl colors
         if (colorString.startsWith("hsl(") && colorString.endsWith(")")) {
-			logger.debug("Parsing HSL color: {}", colorString);
+			logger.trace("Parsing HSL color: {}", colorString);
             String values = colorString.substring(4, colorString.length() - 1);
             return parseHslValues(values);
         }

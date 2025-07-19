@@ -1,4 +1,4 @@
-package org.dev.bwdesigngroup.designerpp.gateway.utils;
+package org.dev.arai.designerpp.gateway.utils;
 
 import java.nio.file.*;
 import java.util.*;
@@ -7,14 +7,14 @@ import java.util.stream.Collectors;
 import java.util.stream.Stream;
 import java.io.IOException;
 
-import org.dev.bwdesigngroup.designerpp.common.DesignerPlusPlusConstants;
+import org.dev.arai.designerpp.common.DesignerPlusPlusConstants;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.inductiveautomation.ignition.common.gson.JsonObject;
 
 public class CSSFileReader {
-	private static final Logger logger = LoggerFactory.getLogger(DesignerPlusPlusConstants.MODULE_ID + ".cssFileReader");
+	private static final Logger logger = LoggerFactory.getLogger(DesignerPlusPlusConstants.MODULE_ID + ".CSSFileReader");
 
 	public JsonObject readCSSFiles(String directory) {
 		logger.debug("Reading CSS files from directory: {}", directory);

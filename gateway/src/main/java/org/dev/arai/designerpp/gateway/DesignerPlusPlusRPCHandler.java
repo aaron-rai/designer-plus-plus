@@ -1,8 +1,8 @@
-package org.dev.bwdesigngroup.designerpp.gateway;
+package org.dev.arai.designerpp.gateway;
 
-import org.dev.bwdesigngroup.designerpp.common.DesignerPlusPlusConstants;
-import org.dev.bwdesigngroup.designerpp.common.DesignerPlusPlusRPC;
-import org.dev.bwdesigngroup.designerpp.gateway.utils.CSSFileReader;
+import org.dev.arai.designerpp.common.DesignerPlusPlusConstants;
+import org.dev.arai.designerpp.common.DesignerPlusPlusRPC;
+import org.dev.arai.designerpp.gateway.utils.CSSFileReader;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -17,7 +17,7 @@ import com.inductiveautomation.ignition.gateway.model.GatewayContext;
  * @author Aaron Rai
  */
 public class DesignerPlusPlusRPCHandler implements DesignerPlusPlusRPC {
-	private final Logger logger = LoggerFactory.getLogger(DesignerPlusPlusConstants.MODULE_ID + ".rpcHandler");
+	private final Logger logger = LoggerFactory.getLogger(DesignerPlusPlusConstants.MODULE_ID + ".RPCHandler");
 	private final GatewayContext context;
 
 	/**

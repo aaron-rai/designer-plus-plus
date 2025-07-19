@@ -1,4 +1,4 @@
-package org.dev.bwdesigngroup.designerpp.actions;
+package org.dev.arai.designerpp.actions;
 
 import java.awt.*;
 import java.awt.event.*;
@@ -9,9 +9,9 @@ import java.util.Map;
 
 import javax.swing.*;
 
-import org.dev.bwdesigngroup.designerpp.common.DesignerPlusPlusConstants;
-import org.dev.bwdesigngroup.designerpp.common.DesignerPlusPlusRPC;
-import org.dev.bwdesigngroup.designerpp.utils.ParseColor;
+import org.dev.arai.designerpp.common.DesignerPlusPlusConstants;
+import org.dev.arai.designerpp.common.DesignerPlusPlusRPC;
+import org.dev.arai.designerpp.utils.ParseColor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -30,7 +30,7 @@ import static com.inductiveautomation.ignition.common.BundleUtil.i18n;
  * @author Aaron Rai
  */
 public class CSSVariableViewerAction extends BaseAction {
-    private static final Logger logger = LoggerFactory.getLogger(DesignerPlusPlusConstants.MODULE_ID + ".cssVariableViewer");
+    private static final Logger logger = LoggerFactory.getLogger(DesignerPlusPlusConstants.MODULE_ID + ".CSSVariableViewer");
     private final DesignerContext context;
     private JFrame cssViewerFrame;
     private final List<String> defaultThemes = DesignerPlusPlusConstants.IGNITION_DEFAULT_THEMES;

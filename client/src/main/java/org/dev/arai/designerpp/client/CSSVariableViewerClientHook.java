@@ -1,4 +1,4 @@
-package org.dev.bwdesigngroup.cssvariableviewer.client;
+package org.dev.arai.designerpp.client;
 
 import com.inductiveautomation.vision.api.client.AbstractClientModuleHook;
 

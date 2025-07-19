@@ -1,9 +1,9 @@
-package org.dev.bwdesigngroup.designerpp.designer;
+package org.dev.arai.designerpp.designer;
 
-import org.dev.bwdesigngroup.designerpp.actions.CSSVariableViewerAction;
-import org.dev.bwdesigngroup.designerpp.actions.NoteAction;
-import org.dev.bwdesigngroup.designerpp.common.DesignerPlusPlusConstants;
-import org.dev.bwdesigngroup.designerpp.utils.ProjectBrowserStateManager;
+import org.dev.arai.designerpp.actions.CSSVariableViewerAction;
+import org.dev.arai.designerpp.actions.NoteAction;
+import org.dev.arai.designerpp.common.DesignerPlusPlusConstants;
+import org.dev.arai.designerpp.utils.ProjectBrowserStateManager;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -32,7 +32,7 @@ import com.jidesoft.action.CommandBar;
  */
 public class DesignerPlusPlusDesignerHook extends AbstractDesignerModuleHook {
 
-    private static final Logger logger = LoggerFactory.getLogger(DesignerPlusPlusConstants.MODULE_ID + ".designerHook");
+    private static final Logger logger = LoggerFactory.getLogger(DesignerPlusPlusConstants.MODULE_ID + ".DesignerHook");
     public static DesignerContext context;
     private ProjectBrowserStateManager browserStateManager;
 
@@ -126,10 +126,12 @@ public class DesignerPlusPlusDesignerHook extends AbstractDesignerModuleHook {
         if (isSepasoftInstalled()) {
             logger.trace("Sepasoft module detected, capturing project browser state");
             if (browserStateManager != null) {
-                browserStateManager.captureState();
+                try {
+                    browserStateManager.captureState();
+                } catch (Exception ex) {
+                    logger.error("Error capturing browser state", ex);
+                }
             }
-        } else {
-            logger.trace("No Sepasoft modules detected, skipping browser state capture");
         }
     }
 
@@ -139,7 +141,11 @@ public class DesignerPlusPlusDesignerHook extends AbstractDesignerModuleHook {
         
         if (isSepasoftInstalled() && browserStateManager != null) {
             logger.trace("Restoring project browser state");
-            browserStateManager.restoreState();
+            try {
+                browserStateManager.restoreState();
+            } catch (Exception ex) {
+                logger.error("Error restoring browser state", ex);
+            }
         }
     }
 
@@ -153,6 +159,7 @@ public class DesignerPlusPlusDesignerHook extends AbstractDesignerModuleHook {
         logger.debug("Designer++ Designer Hook shutting down");
         if (browserStateManager != null) {
             browserStateManager = null;
+            logger.debug("BrowserStateManager reference cleared");
         }
     }
 }

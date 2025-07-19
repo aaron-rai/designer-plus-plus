@@ -1,5 +1,6 @@
-package org.dev.bwdesigngroup.designerpp.gateway;
+package org.dev.arai.designerpp.gateway;
 
+import org.dev.arai.designerpp.common.DesignerPlusPlusConstants;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -26,7 +27,7 @@ import com.inductiveautomation.ignition.gateway.web.pages.status.overviewmeta.Ov
  * @author Aaron Rai
  */
 public class DesignerPlusPlusGatewayHook extends AbstractGatewayModuleHook {
-    private static final Logger logger = LoggerFactory.getLogger(DesignerPlusPlusGatewayHook.class);
+    private static final Logger logger = LoggerFactory.getLogger(DesignerPlusPlusConstants.MODULE_ID + ".GatewayHook");
     private static GatewayContext context;
 
     /**
@@ -36,7 +37,6 @@ public class DesignerPlusPlusGatewayHook extends AbstractGatewayModuleHook {
      */
     @Override
     public void setup(GatewayContext context) {
-        logger.info("Designer++ Gateway Hook setup started");
         DesignerPlusPlusGatewayHook.context = context;
     }
 
@@ -46,7 +46,7 @@ public class DesignerPlusPlusGatewayHook extends AbstractGatewayModuleHook {
      */
     @Override
     public void startup(LicenseState activationState) {
-        logger.info("Starting up Designer++ Gateway Hook");
+        logger.debug("Starting up Designer++ Gateway Hook");
     }
 
     /**
@@ -173,7 +173,7 @@ public class DesignerPlusPlusGatewayHook extends AbstractGatewayModuleHook {
      */
     @Override
     public Object getRPCHandler(ClientReqSession session, String projectName) {
-        logger.info("Creating RPC Handler for session: " + session.getId() + ", project: " + projectName);
+        logger.debug("Creating RPC Handler for session: " + session.getId() + ", project: " + projectName);
         return new DesignerPlusPlusRPCHandler(context);
     }
 }

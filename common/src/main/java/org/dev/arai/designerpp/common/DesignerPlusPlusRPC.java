@@ -1,4 +1,4 @@
-package org.dev.bwdesigngroup.designerpp.common;
+package org.dev.arai.designerpp.common;
 
 import com.inductiveautomation.ignition.common.gson.JsonObject;
 

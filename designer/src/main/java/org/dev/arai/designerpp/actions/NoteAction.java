@@ -21,7 +21,6 @@ import java.awt.Dimension;
 import com.inductiveautomation.ignition.client.util.action.BaseAction;
 import com.inductiveautomation.ignition.common.gson.JsonObject;
 import com.inductiveautomation.ignition.common.gson.JsonParser;
-import com.inductiveautomation.ignition.common.util.LoggerEx;
 import com.inductiveautomation.ignition.designer.model.DesignerContext;
 
 import static com.inductiveautomation.ignition.common.BundleUtil.i18n;
@@ -196,7 +195,7 @@ public class NoteAction extends BaseAction {
 				return "";
 			}
 		} else {
-			logger.warn("NotePad file does not exist at {}! This is unexpected! Creating new file. ", notePadFile.getAbsolutePath());
+			logger.warn("NotePad file does not exist at {}! This is unexpected! Creating new file.", notePadFile.getAbsolutePath());
 			try {
 				notePadFile.createNewFile();
 			} catch (IOException e) {

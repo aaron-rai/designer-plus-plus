@@ -15,7 +15,7 @@ Enhanced designer tools and utilities for Ignition development that improve the 
 
 - **Quick Notes**: Simple text editor accessible from the designer toolbar for jotting down quick notes, TODOs, or code snippets
 - **Project-Scoped**: Notes are saved per project (planned feature)
-- **Persistent Storage (Planned)**: Notes are automatically saved and restored between designer sessions
+- **Persistent Storage**: Notes are automatically saved and restored between designer sessions
 - **Clean Interface**: Minimal, distraction-free editor with clear and close buttons
 
 ### 🌳 Project Browser State Manager
@@ -66,7 +66,7 @@ This feature works automatically in the background when Sepasoft modules are det
 - State is automatically restored after save completion
 - No user interaction required
 
-## Building from Source
+## For Developers
 
 ### Prerequisites
 
@@ -117,14 +117,19 @@ designer-plus-plus/
 ### ✅ Completed
 
 - CSS Variable Viewer with visual interface
-- Designer NotePad
+- Designer NotePad with persistent storage per project
 - Project browser state management for Designers with Sepasoft modules
 
 ### 🚧 In Progress
 
-- Per-project notepad storage
+- Additional toolbar button to set custom property persistence and access mode
+
+### 🗓 Planned
+
 - Enhanced CSS variable filtering and search
 - Additional theme format support
+- Panel/workspace for note management(another option instead of popup window)
+- Fix project browser state management when deleting resources in project(may not be possible due to SDK limitations, but will investigate)
 
 ## Contributing
 
@@ -144,8 +149,8 @@ designer-plus-plus/
 
 ### NotePad File Issues
 
-- Ensure the notePad.txt file was created in the designers resources directory
-- Ensure the notePad.txt file is not locked by another process
+- Ensure the notePad.json file was created in the designers resources directory
+- Ensure the notePad.json file is not locked by another process
 
 ### Project Browser State Not Saving
 
@@ -155,7 +160,7 @@ designer-plus-plus/
 
 ## License
 
-This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
+This project is licensed under the MIT License - see the [LICENSE](LICENSE.txt) file for details.
 
 ## Support
 

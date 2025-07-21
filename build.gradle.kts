@@ -14,6 +14,7 @@ ignitionModule {
     id.set("DesignerPlusPlus")
     moduleVersion.set(findProperty("version")?.toString() ?: "0.0.0-SNAPSHOT")
     moduleDescription.set("Enhanced designer tools and utilities for Ignition development.")
+    license.set("LICENSE.txt")
     requiredIgnitionVersion.set(sdk_version)
     projectScopes.putAll(mapOf(
         ":client" to "CD",

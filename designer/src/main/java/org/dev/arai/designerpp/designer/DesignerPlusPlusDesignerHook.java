@@ -1,13 +1,17 @@
 package org.dev.arai.designerpp.designer;
 
 import org.dev.arai.designerpp.actions.CSSVariableViewerAction;
+import org.dev.arai.designerpp.actions.CleanParamsAction;
 import org.dev.arai.designerpp.actions.NoteAction;
+import org.dev.arai.designerpp.actions.SanitizeCustomPropsAction;
+import org.dev.arai.designerpp.actions.SetParamsAction;
 import org.dev.arai.designerpp.common.DesignerPlusPlusConstants;
 import org.dev.arai.designerpp.utils.ProjectBrowserStateManager;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.io.File;
+import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -38,17 +42,26 @@ public class DesignerPlusPlusDesignerHook extends AbstractDesignerModuleHook {
 
     /**
      * Default constructor for the CSSVariableViewerDesignerHook.
+     * Initializes the designer context and perspective module.
+     * @param context The DesignerContext instance for this module.
+     * @param activationState The LicenseState for the module.
      */
     @Override
     public void startup(DesignerContext context, LicenseState activationState) throws Exception {
         logger.debug("Designer++ Designer Hook started");
-        BundleUtil.get().addBundle("designerpp", this.getClass(), "designer");
+        
         DesignerPlusPlusDesignerHook.context = context;
         browserStateManager = new ProjectBrowserStateManager(context);
-        File noteFile = new File("notePad.json");
+
+        BundleUtil.get().addBundle("designerpp", this.getClass(), "designer");
+
+        String userHome = System.getProperty("user.home");
+        File noteFile = new File(userHome, "notePad.json");
+        // OR use temp directory: File noteFile = new File(System.getProperty("java.io.tmpdir"), "notePad.json");
+        
         if (!noteFile.exists()) {
             noteFile.createNewFile();
-            logger.info("Created notePad.json file in /Applications/Designer Launcher.app/Contents/Resources");
+            logger.info("Created notePad.json file at: " + noteFile.getAbsolutePath());
         }
     }
 
@@ -71,8 +84,23 @@ public class DesignerPlusPlusDesignerHook extends AbstractDesignerModuleHook {
             context,
             VectorIcons.getInteractive("file-text")
         );
+        CleanParamsAction cleanParams = new CleanParamsAction(
+            context,
+            VectorIcons.getInteractive("clear-erase")
+        );
+        SetParamsAction setParams = new SetParamsAction(
+            context,
+            VectorIcons.getInteractive("set-prop")
+        );
+        SanitizeCustomPropsAction sanitizeCustomProps = new SanitizeCustomPropsAction(
+            context,
+            VectorIcons.getInteractive("property-transient")
+        );
 
         toolbar.addButton(cssAction);
+        toolbar.addButton(cleanParams);
+        toolbar.addButton(setParams);
+        toolbar.addButton(sanitizeCustomProps);
         toolbar.addButton(noteAction);
 
         toolbars.add(toolbar);

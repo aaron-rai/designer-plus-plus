@@ -23,6 +23,8 @@ ignitionModule {
         ":gateway" to "G"
     ))
     moduleDependencies.set(mapOf<String, String>())
+    // This module depends on the Perspective module for designer features
+    moduleDependencies.put("com.inductiveautomation.perspective", "D")
     moduleDependencySpecs { }
     hooks.putAll(mapOf(
         "org.dev.arai.designerpp.gateway.DesignerPlusPlusGatewayHook" to "G",

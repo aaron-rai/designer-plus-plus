@@ -56,11 +56,14 @@ public class DesignerPlusPlusDesignerHook extends AbstractDesignerModuleHook {
 
         String userHome = System.getProperty("user.home");
         File noteFile = new File(userHome, "notePad.json");
-        // OR use temp directory: File noteFile = new File(System.getProperty("java.io.tmpdir"), "notePad.json");
         
         if (!noteFile.exists()) {
-            noteFile.createNewFile();
-            logger.info("Created notePad.json file at: " + noteFile.getAbsolutePath());
+            try {
+                noteFile.createNewFile();
+                logger.info("Created notePad.json file at: " + noteFile.getAbsolutePath());
+            } catch (Exception e) {
+                logger.error("Error creating notePad.json file: " + e.getMessage());
+            }
         }
     }
 
@@ -96,10 +99,11 @@ public class DesignerPlusPlusDesignerHook extends AbstractDesignerModuleHook {
             VectorIcons.getInteractive("property-transient")
         );
 
-        toolbar.addButton(cssAction);
-        toolbar.addButton(cleanParams);
         toolbar.addButton(setParams);
+        toolbar.addButton(cleanParams);
         toolbar.addButton(sanitizeCustomProps);
+        toolbar.addSeparator();
+        toolbar.addButton(cssAction);
         toolbar.addButton(noteAction);
 
         toolbars.add(toolbar);

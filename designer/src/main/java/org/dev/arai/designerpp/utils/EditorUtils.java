@@ -1,7 +1,6 @@
 package org.dev.arai.designerpp.utils;
 
 import java.util.Collection;
-import java.util.Collections;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -9,18 +8,14 @@ import org.dev.arai.designerpp.common.DesignerPlusPlusConstants;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.inductiveautomation.ignition.common.gson.JsonArray;
 import com.inductiveautomation.ignition.common.gson.JsonObject;
-import com.inductiveautomation.ignition.common.gson.JsonPrimitive;
 import com.inductiveautomation.ignition.designer.model.DesignerContext;
 import com.inductiveautomation.ignition.designer.tabbedworkspace.ResourceEditor;
 import com.inductiveautomation.ignition.designer.tabbedworkspace.TabbedResourceWorkspace;
-import com.inductiveautomation.perspective.common.api.PropertyKey;
 import com.inductiveautomation.perspective.common.config.PropertyConfigCollection;
 import com.inductiveautomation.perspective.common.config.ViewConfig;
 import com.inductiveautomation.perspective.designer.DesignerHook;
 import com.inductiveautomation.perspective.designer.workspace.ViewResourceEditor;
-import com.teamdev.jxbrowser.js.Json;
 /**
  * EditorUtils provides utility methods for interacting with the editor workspace in the Ignition Designer.
  * It allows retrieval of the workspace, editors, and selected editor using reflection.

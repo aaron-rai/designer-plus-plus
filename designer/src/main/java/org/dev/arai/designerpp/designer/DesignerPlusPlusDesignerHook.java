@@ -99,8 +99,8 @@ public class DesignerPlusPlusDesignerHook extends AbstractDesignerModuleHook {
             VectorIcons.getInteractive("property-transient")
         );
 
-        toolbar.addButton(setParams);
-        toolbar.addButton(cleanParams);
+        // toolbar.addButton(setParams);
+        // toolbar.addButton(cleanParams);
         toolbar.addButton(sanitizeCustomProps);
         toolbar.addSeparator();
         toolbar.addButton(cssAction);

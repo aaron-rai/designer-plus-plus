@@ -48,11 +48,11 @@ public class DesignerPlusPlusDesignerHook extends AbstractDesignerModuleHook {
     @Override
     public void startup(DesignerContext context, LicenseState activationState) throws Exception {
         logger.debug("Designer++ Designer Hook started");
+        BundleUtil.get().addBundle("designerpp", this.getClass(), "designer");
         
         DesignerPlusPlusDesignerHook.context = context;
         browserStateManager = new ProjectBrowserStateManager(context);
 
-        BundleUtil.get().addBundle("designerpp", this.getClass(), "designer");
 
         String userHome = System.getProperty("user.home");
         File noteFile = new File(userHome, "notePad.json");

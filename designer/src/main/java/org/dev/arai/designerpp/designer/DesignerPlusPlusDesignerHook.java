@@ -1,7 +1,10 @@
 package org.dev.arai.designerpp.designer;
 
 import org.dev.arai.designerpp.actions.CSSVariableViewerAction;
+import org.dev.arai.designerpp.actions.CleanParamsAction;
 import org.dev.arai.designerpp.actions.NoteAction;
+import org.dev.arai.designerpp.actions.SanitizeCustomPropsAction;
+import org.dev.arai.designerpp.actions.SetParamsAction;
 import org.dev.arai.designerpp.common.DesignerPlusPlusConstants;
 import org.dev.arai.designerpp.utils.ProjectBrowserStateManager;
 import org.slf4j.Logger;
@@ -38,17 +41,29 @@ public class DesignerPlusPlusDesignerHook extends AbstractDesignerModuleHook {
 
     /**
      * Default constructor for the CSSVariableViewerDesignerHook.
+     * Initializes the designer context and perspective module.
+     * @param context The DesignerContext instance for this module.
+     * @param activationState The LicenseState for the module.
      */
     @Override
     public void startup(DesignerContext context, LicenseState activationState) throws Exception {
         logger.debug("Designer++ Designer Hook started");
         BundleUtil.get().addBundle("designerpp", this.getClass(), "designer");
+        
         DesignerPlusPlusDesignerHook.context = context;
         browserStateManager = new ProjectBrowserStateManager(context);
-        File noteFile = new File("notePad.json");
+
+
+        String userHome = System.getProperty("user.home");
+        File noteFile = new File(userHome, "notePad.json");
+        
         if (!noteFile.exists()) {
-            noteFile.createNewFile();
-            logger.info("Created notePad.json file in /Applications/Designer Launcher.app/Contents/Resources");
+            try {
+                noteFile.createNewFile();
+                logger.info("Created notePad.json file at: " + noteFile.getAbsolutePath());
+            } catch (Exception e) {
+                logger.error("Error creating notePad.json file: " + e.getMessage());
+            }
         }
     }
 
@@ -71,7 +86,23 @@ public class DesignerPlusPlusDesignerHook extends AbstractDesignerModuleHook {
             context,
             VectorIcons.getInteractive("file-text")
         );
+        CleanParamsAction cleanParams = new CleanParamsAction(
+            context,
+            VectorIcons.getInteractive("clear-erase")
+        );
+        SetParamsAction setParams = new SetParamsAction(
+            context,
+            VectorIcons.getInteractive("set-prop")
+        );
+        SanitizeCustomPropsAction sanitizeCustomProps = new SanitizeCustomPropsAction(
+            context,
+            VectorIcons.getInteractive("property-transient")
+        );
 
+        // toolbar.addButton(setParams);
+        // toolbar.addButton(cleanParams);
+        toolbar.addButton(sanitizeCustomProps);
+        toolbar.addSeparator();
         toolbar.addButton(cssAction);
         toolbar.addButton(noteAction);
 

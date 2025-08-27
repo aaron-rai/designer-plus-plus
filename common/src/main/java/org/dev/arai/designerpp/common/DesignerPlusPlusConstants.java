@@ -15,4 +15,5 @@ public class DesignerPlusPlusConstants {
     public static final List<String> IGNITION_DEFAULT_THEMES = List.of(
         "dark", "dark-cool", "dark-warm", "light", "light-cool", "light-warm", "sepasoft-light", "sepasoft-dark"
     );
+    public static final String PERSPECTIVE_MODULE_ID = "com.inductiveautomation.perspective";
 }

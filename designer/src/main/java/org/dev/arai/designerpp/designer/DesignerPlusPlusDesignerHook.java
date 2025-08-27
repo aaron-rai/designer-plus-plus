@@ -2,10 +2,12 @@ package org.dev.arai.designerpp.designer;
 
 import org.dev.arai.designerpp.actions.CSSVariableViewerAction;
 import org.dev.arai.designerpp.actions.CleanParamsAction;
+import org.dev.arai.designerpp.actions.GatewayScriptConsole;
 import org.dev.arai.designerpp.actions.NoteAction;
 import org.dev.arai.designerpp.actions.SanitizeCustomPropsAction;
 import org.dev.arai.designerpp.actions.SetParamsAction;
 import org.dev.arai.designerpp.common.DesignerPlusPlusConstants;
+import org.dev.arai.designerpp.common.DesignerPlusPlusRPC;
 import org.dev.arai.designerpp.utils.ProjectBrowserStateManager;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -15,6 +17,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
+import com.inductiveautomation.ignition.client.gateway_interface.ModuleRPCFactory;
 import com.inductiveautomation.ignition.client.icons.VectorIcons;
 import com.inductiveautomation.ignition.common.BundleUtil;
 import com.inductiveautomation.ignition.common.licensing.LicenseState;
@@ -98,11 +101,16 @@ public class DesignerPlusPlusDesignerHook extends AbstractDesignerModuleHook {
             context,
             VectorIcons.getInteractive("property-transient")
         );
+        GatewayScriptConsole gatewayScriptConsole = new GatewayScriptConsole(
+            context,
+            VectorIcons.getInteractive("script-console")
+        );
 
         // toolbar.addButton(setParams);
         // toolbar.addButton(cleanParams);
         toolbar.addButton(sanitizeCustomProps);
         toolbar.addSeparator();
+        toolbar.addButton(gatewayScriptConsole);
         toolbar.addButton(cssAction);
         toolbar.addButton(noteAction);
 
@@ -178,6 +186,11 @@ public class DesignerPlusPlusDesignerHook extends AbstractDesignerModuleHook {
                 logger.error("Error restoring browser state", ex);
             }
         }
+    }
+
+    public static DesignerPlusPlusRPC getRPCHandler() {
+        DesignerPlusPlusRPC rpc = ModuleRPCFactory.create(DesignerPlusPlusConstants.MODULE_ID, DesignerPlusPlusRPC.class);
+        return rpc;
     }
 
     /**

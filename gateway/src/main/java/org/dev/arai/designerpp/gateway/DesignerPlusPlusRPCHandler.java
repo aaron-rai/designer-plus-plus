@@ -3,6 +3,7 @@ package org.dev.arai.designerpp.gateway;
 import org.dev.arai.designerpp.common.DesignerPlusPlusConstants;
 import org.dev.arai.designerpp.common.DesignerPlusPlusRPC;
 import org.dev.arai.designerpp.gateway.utils.CSSFileReader;
+import org.dev.arai.designerpp.gateway.utils.RunScriptConsoleCode;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -40,5 +41,16 @@ public class DesignerPlusPlusRPCHandler implements DesignerPlusPlusRPC {
 		logger.debug("getCSSData called");
 		CSSFileReader cssFileReader = new CSSFileReader();
 		return cssFileReader.readCSSFiles(DesignerPlusPlusConstants.THEMES_DIRECTORY);
+	}
+
+	@Override
+	public void runCode(String code) {
+		logger.debug("runCode called with code: " + code);
+		RunScriptConsoleCode runner = new RunScriptConsoleCode();
+		try {
+			runner.runCode(context.getScriptManager(), code);
+		} catch (Exception e) {
+			logger.error("Error executing script code", e);
+		}
 	}
 }

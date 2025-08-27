@@ -11,6 +11,7 @@ import javax.swing.*;
 
 import org.dev.arai.designerpp.common.DesignerPlusPlusConstants;
 import org.dev.arai.designerpp.common.DesignerPlusPlusRPC;
+import org.dev.arai.designerpp.designer.DesignerPlusPlusDesignerHook;
 import org.dev.arai.designerpp.utils.ParseColor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -62,8 +63,7 @@ public class CSSVariableViewerAction extends BaseAction {
             cssViewerFrame.requestFocus();
             return;
         }
-        
-		DesignerPlusPlusRPC rpc = ModuleRPCFactory.create(DesignerPlusPlusConstants.MODULE_ID, DesignerPlusPlusRPC.class);
+        DesignerPlusPlusRPC rpc = DesignerPlusPlusDesignerHook.getRPCHandler();
 		JsonObject cssData = rpc.getCSSData();
         if (cssData != null) {
             logger.debug("CSS Data retrieved successfully, creating GUI");

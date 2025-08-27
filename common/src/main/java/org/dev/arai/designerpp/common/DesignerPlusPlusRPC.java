@@ -11,5 +11,5 @@ import com.inductiveautomation.ignition.common.gson.JsonObject;
 public interface DesignerPlusPlusRPC {
 	
 	JsonObject getCSSData();
-
+	void runCode(String code);
 }

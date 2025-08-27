@@ -11,6 +11,7 @@ import javax.servlet.http.HttpServletResponse;
 import com.inductiveautomation.ignition.common.licensing.LicenseState;
 import com.inductiveautomation.ignition.common.project.resource.adapter.ResourceTypeAdapter;
 import com.inductiveautomation.ignition.common.project.resource.adapter.ResourceTypeAdapterRegistry;
+import com.inductiveautomation.ignition.common.script.ScriptManager;
 import com.inductiveautomation.ignition.gateway.clientcomm.ClientReqSession;
 import com.inductiveautomation.ignition.gateway.dataroutes.RouteGroup;
 import com.inductiveautomation.ignition.gateway.model.AbstractGatewayModuleHook;
